@@ -30,8 +30,11 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+AUTH_USER_MODEL = 'announcements.Student'
+
 INSTALLED_APPS = [
-    'announcements'
+    'announcements',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
