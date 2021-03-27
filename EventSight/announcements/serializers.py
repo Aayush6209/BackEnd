@@ -4,6 +4,10 @@ from .models import Student, Club, member_request, Event, Comment
 
 # these are serializers
 
+class student_login_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['username', 'password']
 
 class student_serializer(serializers.ModelSerializer):
     # copy fields from models.py
