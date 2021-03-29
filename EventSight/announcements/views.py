@@ -11,7 +11,7 @@ from django.db import IntegrityError
 from .models import Student, Club, Event, member_request, Comment
 from .serializers import student_serializer, student_login_serializer
 
-from colorama import Fore, Style
+# from colorama import Fore, Style
 
 # Create your views here.
 """
