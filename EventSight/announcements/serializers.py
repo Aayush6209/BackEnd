@@ -1,13 +1,22 @@
 from django.db.models import fields
 from rest_framework import serializers
 from .models import Student, Club, member_request, Event, Comment
+from django import forms
 
 # these are serializers
 
-class student_login_serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Student
-        fields = ['username', 'password']
+
+class student_login_serializer(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Password'}))
+    fields = ['username', 'password']
+
+
+# class student_login_serializer(serializers.ModelSerializer):
+#     class Form:
+#         model = Student
+#         fields = ['username', 'password']
+
 
 class student_serializer(serializers.ModelSerializer):
     # copy fields from models.py

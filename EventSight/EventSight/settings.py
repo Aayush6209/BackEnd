@@ -32,6 +32,12 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'announcements.Student'
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#     ]
+# }
+
 INSTALLED_APPS = [
     'announcements',
     'rest_framework',
