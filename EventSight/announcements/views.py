@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from .models import Student, Club, Event, member_request, Comment
 from .serializers import student_serializer, student_login_serializer
@@ -76,11 +77,109 @@ def login_view(request):
         return Response(serializer.data)
 
 
-
+@login_required
 @api_view(['GET'])
 def logout_view(request):
-    logout(request)
-    return Response(status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        # print("CURRENT USER:", request.user)
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
+
+
+@login_required
+@api_view(['GET', 'PUT', 'POST'])
+def create_event(request):
+    current_student = request.user
+    if request.method == 'GET':
+        # return all those events where user is not registered
+        pass
+    elif request.method == 'POST':
+        # add the student to participant list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def event_register(request):
+    if request.method == 'GET':
+        # return all those events where user is not registered
+        pass
+    elif request.method == 'POST':
+        # add the student to participant list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def event_interested(request):
+    if request.method == 'GET':
+        # return all those events where user is not interested
+        pass
+    elif request.method == 'POST':
+        # add the event to interest list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def club_follow(request):
+    if request.method == 'GET':
+        # return all those clubs where user is not following
+        pass
+    elif request.method == 'POST':
+        # add the club to follow list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def club_unfollow(request):
+    if request.method == 'GET':
+        # return all those clubs where user is following
+        pass
+    elif request.method == 'POST':
+        # remove the club to follow list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def member_request(request):
+    if request.method == 'GET':
+        # return all those clubs where user is not member
+        pass
+    elif request.method == 'POST':
+        # add the member request to be validated by admin
+        pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def member_request_validation(request):
+    if request.method == 'GET':
+        # return all those members who requested for membership
+        pass
+    elif request.method == 'POST':
+        # if ACCEPTED
+            # add the selected member to main list
+        # remove them from member_request table
+        pass
+    pass
+
+
+@login_required
+@api_view(['POST'])
+def create_comment(request):
+    if request.method == 'POST':
+        # add comment in comment table
+        pass
+    pass
+
 
 '''
 {
