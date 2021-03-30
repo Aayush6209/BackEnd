@@ -49,6 +49,13 @@ class Event(models.Model):
     image_url = models.URLField()
 
 
+class participation_request(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, default=None)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
+    date_time = models.DateTimeField(auto_created=True)
+
+
 class Comment(models.Model):
 
     comment_text = models.CharField(max_length=2048)
