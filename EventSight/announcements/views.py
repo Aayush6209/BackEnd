@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from rest_framework import response
-from .serializers import event_serializer, student_serializer
+from rest_framework import response, serializers
+from .serializers import comment_serializer, event_serializer, student_serializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,10 +25,10 @@ Kites@123
 @api_view(['GET', 'POST'])
 def register_view(request):
     if request.method == "POST":
-        print("inside post")
+        # print("inside post")
         serializer = student_serializer(data=request.data)
         if serializer.is_valid():
-            print("serializer is valid")
+            # print("serializer is valid")
             try:
                 username = serializer.validated_data.get('username')
                 password = serializer.validated_data.get('password')
@@ -96,6 +96,8 @@ def create_event(request):
     elif request.method == 'POST':
         # add the student to participant list
         pass
+    elif request.method == 'PUT':
+        pass
     pass
 
 
@@ -119,6 +121,26 @@ def event_interested(request):
         pass
     elif request.method == 'POST':
         # add the event to interest list
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def non_member_participation_request(request):
+    if request.method == 'GET':
+        pass
+    elif request.method == 'POST':
+        pass
+    pass
+
+
+@login_required
+@api_view(['GET', 'POST'])
+def non_member_participation_request_validation(request):
+    if request.method == 'GET':
+        pass
+    elif request.method == 'POST':
         pass
     pass
 
@@ -163,7 +185,12 @@ def member_request(request):
 def member_request_validation(request):
     if request.method == 'GET':
         # return all those members who requested for membership
-        pass
+        student = Student.objects.get(username=request.user)
+        club = student.club_admin
+        member_requests = member_request.objects.filter(club=club)
+        students = Student.objects.filter(username=member_requests.student)
+        serializer = student_serializer(students, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         # if ACCEPTED
             # add the selected member to main list
@@ -177,8 +204,21 @@ def member_request_validation(request):
 def create_comment(request):
     if request.method == 'POST':
         # add comment in comment table
-        pass
-    pass
+        student = Student.objects.get(username=request.user)
+        serializer = comment_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                comment_text = serializer.validated_data.get('comment_text')
+                # event is Event object
+                event = serializer.validated_data.get('event')
+                new_comment = Comment.objects.create(student=student, comment_text=comment_text, event=event)
+                new_comment.save()
+                comments = Comment.objects.all()
+                serializer = comment_serializer(comments, many=True)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response(serializer.data, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 '''
