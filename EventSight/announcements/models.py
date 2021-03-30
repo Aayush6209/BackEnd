@@ -13,7 +13,7 @@ class Club(models.Model):
     # club will have an admin, and if we delete admin then it would do nothing
     name = models.CharField(max_length=128, primary_key=True)
     admin = models.ForeignKey(
-        Student, on_delete=models.DO_NOTHING, default=None)
+        Student, on_delete=models.DO_NOTHING, default=None, related_name="club_admin")
     description = models.CharField(max_length=2048)
     followers = models.ManyToManyField(
         Student, blank=True, related_name="follow_list")

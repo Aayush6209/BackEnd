@@ -81,7 +81,7 @@ def login_view(request):
 @api_view(['GET'])
 def logout_view(request):
     if request.method == 'GET':
-        # print("CURRENT USER:", request.user)
+        print("CURRENT USER:", request.user)
         logout(request)
         return Response(status=status.HTTP_200_OK)
 
