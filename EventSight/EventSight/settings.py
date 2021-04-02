@@ -31,7 +31,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
-AUTH_USER_MODEL = 'announcements.Student'
 
 INSTALLED_APPS = [
     'announcements',

@@ -7,8 +7,10 @@ from django import forms
 
 
 class student_login_serializer(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
-    password = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Password'}))
+    username = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Password'}))
     fields = ['username', 'password']
 
 
@@ -45,3 +47,28 @@ class comment_serializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+
+
+class create_event_serializer(forms.Form):
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'name'}))
+    description = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'description'}))
+    details = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'details'}))
+    date_time = forms.DateTimeField(widget=forms.TextInput(
+        attrs={'placeholder': 'date_time'}))
+    open_to_all = forms.BooleanField(widget=forms.TextInput(
+        attrs={'placeholder': 'open_to_all'}))
+    image_url = forms.URLField(widget=forms.TextInput(
+        attrs={'placeholder': 'image_url'}))
+    username = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Username'}))
+    fields = ['title', 'description', 'details',
+              'date_time', 'open_to_all', 'image_url', 'username']
+
+
+class get_username(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Username'}))
+    fields = ['username']

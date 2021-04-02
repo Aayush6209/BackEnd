@@ -1,11 +1,13 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# username, email, password, first_name, last_name
-# would be handled by parent class
-class Student(AbstractUser):
-    pass
+class Student(models.Model):
+    username = models.CharField(max_length=8, primary_key=True)
+    password = models.CharField(max_length=1024)
+    email = models.EmailField(max_length=1024)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
+    branch = models.CharField(max_length=64)
 
 
 class Club(models.Model):
@@ -39,7 +41,7 @@ class Event(models.Model):
     description = models.CharField(max_length=2048)
     details = models.CharField(max_length=2048)
     date_time = models.DateTimeField()
-    organizers = models.ForeignKey(
+    organizer = models.ForeignKey(
         Club, on_delete=models.CASCADE, related_name="event_organizers")
     interested = models.ManyToManyField(
         Student, blank=True, related_name="interested_events")
