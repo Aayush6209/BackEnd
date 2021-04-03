@@ -14,9 +14,11 @@ from django.db import IntegrityError
 # Create your views here.
 """
 user
-user@pec.edu.in
+user@gmail.com
 user@123
 """
+
+active_users = []
 
 
 @api_view(['GET', 'POST'])
@@ -68,58 +70,89 @@ def login_view(request):
                 return Response(status=status.HTTP_403_FORBIDDEN)
             events = Event.objects.all()
             serializer = event_serializer(events, many=True)
+            active_users.append(username)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
     elif request.method == "GET":
         return Response(status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def logout_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
+        serializer = student_login_serializer(data=request.data)
+        username = serializer.data('username')
+        active_users.remove(username)
         return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
 def create_event(request):
-    if request.method == 'GET':
-        return Response(status=status.HTTP_200_OK)
-    serializer = get_username(data=request.data)
-    admin = serializer.data["username"]
+    try:
+        serializer = universal_serializer(data=request.data)
+        admin = serializer.data["username"]
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if admin not in active_users:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         club = Club.objects.get(admin=admin)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    try:
-        title = serializer.data["title"]
-        description = serializer.data["description"]
-        details = serializer.data["details"]
-        date_time = serializer.data["date_time"]
-        open_to_all = serializer.data["open_to_all"]
-        image_url = serializer.data["image_url"]
-        new_event = Event.objects.create(title=title, description=description, details=details,
-                                         date_time=date_time, organizer=club, open_to_all=open_to_all, image_url=image_url)
-        new_event.save()
-        return Response(status=status.HTTP_201_CREATED)
-    except:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'GET':
+        try:
+            events = Event.objects.filter(organizer=club)
+        except:
+            events = None
+        serializer = event_serializer(events, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        try:
+            title = serializer.data["title"]
+            description = serializer.data["description"]
+            details = serializer.data["details"]
+            date_time = serializer.data["date_time"]
+            open_to_all = serializer.data["open_to_all"]
+            image_url = serializer.data["image_url"]
+            new_event = Event.objects.create(title=title, description=description, details=details,
+                                             date_time=date_time, organizer=club, open_to_all=open_to_all, image_url=image_url)
+            new_event.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['PUT', 'DELETE'])
 def update_event(request, pk):
     try:
         event = Event.objects.get(pk=pk)
     except:
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serializer = event_serializer(event)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'PUT':
-        serializer = event_serializer(event, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_200_OK)
+    try:
+        serializer = universal_serializer(data=request.data)
+        admin = serializer.data["username"]
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if admin not in active_users:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        club = Club.objects.get(admin=admin)
+    except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    if club != event.organizer:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == 'PUT':
+        try:
+            event.title = serializer.data["title"]
+            event.description = serializer.data["description"]
+            event.details = serializer.data["details"]
+            event.date_time = serializer.data["date_time"]
+            event.open_to_all = serializer.data["open_to_all"]
+            event.image_url = serializer.data["image_url"]
+            event.save()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         event.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
@@ -253,20 +286,19 @@ def create_comment(request):
 
 '''
 {
-    "password": "user1@123",
-    "username": "19103001",
+    "password": "user2@123",
+    "username": "19103002",
     "first_name": "Person",
-    "last_name": "1",
-    "email": "person1@gmail.com",
-    "branch": "CSE"
+    "last_name": "2",
+    "email": "person2@gmail.com"
 }
 '''
 
 '''
 {
-    "title": "event1",
-    "description": "this is event1",
-    "details": "to be conducted at location1",
+    "title": "event2",
+    "description": "this is event2",
+    "details": "to be conducted at location2",
     "date_time": "2006-10-25 14:30:59",
     "open_to_all": "True",
     "image_url": "url",

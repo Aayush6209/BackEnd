@@ -14,7 +14,7 @@ class student_login_serializer(forms.Form):
     fields = ['username', 'password']
 
 
-class student_serializer(serializers.ModelSerializer):
+class universal_serializer(serializers.ModelSerializer):
     # copy fields from models.py
     class Meta:
         model = Student
