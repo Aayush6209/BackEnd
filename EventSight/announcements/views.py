@@ -166,8 +166,7 @@ def event_register(request):
         try:
             events = Event.objects.all()
             serializer = event_serializer(events, many=True)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'POST':
@@ -200,9 +199,10 @@ def event_interested(request):
         # return all the events
         try:
             events = Event.objects.all()
+            print(events)
             serializer = event_serializer(events, many=True)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            print(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'POST':
@@ -229,30 +229,12 @@ def event_interested(request):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['GET', 'POST'])
-# def non_member_participation_request(request):
-#     if request.method == 'GET':
-#         pass
-#     elif request.method == 'POST':
-#         pass
-#     pass
-
-
-# @api_view(['GET', 'POST'])
-# def non_member_participation_request_validation(request):
-#     if request.method == 'GET':
-#         pass
-#     elif request.method == 'POST':
-#         pass
-#     pass
-
-
 @api_view(['GET', 'POST'])
 def club_follow(request):
     serializer = universal_serializer(data=request.data)
     username=serializer.data['username']
     student = Student.objects.get(username=username)
-    if request.method == 'GET': ---
+    if request.method == 'GET':
         # return all those clubs where user is not following
         follow_list = student.follow_list.filter()
         ids = []
@@ -263,9 +245,8 @@ def club_follow(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         # add the club to follow list
-        # TODO primary key need to be set
-        club_id = serializer.data["club_id"]
-        club = Club.objects.get(pk=club_id)
+        club_name = serializer.data["name"]
+        club = Club.objects.get(pk=club_name)
         club.followers.add(student)
         return Response(status=status.HTTP_200_OK)
 
@@ -276,7 +257,7 @@ def club_unfollow(request):
     username = serializer.data['username']
     student = Student.objects.get(username=username)
     if request.method == 'GET':
-        # return all those clubs where user is not following
+        # return all those clubs where user is following
         follow_list = student.follow_list.filter()
         ids = []
         for i in follow_list:
@@ -285,56 +266,76 @@ def club_unfollow(request):
         serializer = club_serializer(clubs_not_in_follow_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        # add the club to follow list
-        club_id = serializer.data["club_id"]
-        club = Club.objects.get(pk=club_id)
-        club.followers.remove(username)
+        # remove the club from follow list
+        club_name = serializer.data["name"]
+        club = Club.objects.get(pk=club_name)
+        club.followers.remove(student)
         return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
-def member_request(request):
+def create_member_request(request):
+    serializer = universal_serializer(data=request.data)
+    username = serializer.data['username']
+    student = Student.objects.get(username=username)
     if request.method == 'GET':
         # return all those clubs where user is not member
-        pass
+        member_list = student.member_list.filter()
+        ids = []
+        for i in member_list:
+            ids.append(i.pk)
+        clubs_not_in_member_list = Club.objects.exclude(pk__in=ids)
+        serializer = club_serializer(clubs_not_in_member_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        # add the member request to be validated by admin
-        pass
+        # add the club to follow list
+        club_name = serializer.data["name"]
+        club = Club.objects.get(name=club_name)
+        new_member_request = member_request.objects.create(student=student, club=club)
+        new_member_request.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
 def member_request_validation(request):
+    serializer = universal_serializer(data=request.data)
+    student = serializer.data['student']
+    student = Student.objects.get(username=student)
     if request.method == 'GET':
         # return all those members who requested for membership
-        pass
+        club = Club.objects.get(name=student.club_admin.get().name)
+        member_requests = member_request.objects.filter(club=club)
+        serializer = member_request_serializer(member_requests, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
+        club = Club.objects.get(name=serializer.data["club"])
+        print(club)
+        print(student)
+        accepted = serializer.data["accepted"]
+        member_requested = member_request.objects.get(student=student, club=club)
+        member_requested.delete()
         # if ACCEPTED
-        # add the selected member to main list
+        if accepted:
+            # add the selected member to main list
+            club.members.add(student)
         # remove them from member_request table
-        pass
-    pass
+        return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 def create_comment(request):
+    serializer = universal_serializer(data=request.data)
+    student = serializer.data['student']
+    student = Student.objects.get(username=student)
     if request.method == 'POST':
-        # add comment in comment table
-        student = Student.objects.get(username=request.user)
-        serializer = comment_serializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                comment_text = serializer.validated_data.get('comment_text')
-                # event is Event object
-                event = serializer.validated_data.get('event')
-                new_comment = Comment.objects.create(
-                    student=student, comment_text=comment_text, event=event)
-                new_comment.save()
-                comments = Comment.objects.all()
-                serializer = comment_serializer(comments, many=True)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except IntegrityError:
-                return Response(serializer.data, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        comment_text = serializer.data['comment_text']
+        event = Event.objects.get(pk=serializer.data['event'])
+        new_comment = Comment.objects.create(
+            student=student, comment_text=comment_text, event=event)
+        new_comment.save()
+        comments = Comment.objects.filter(event=event)
+        serializer = comment_serializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # login
 '''
@@ -382,5 +383,61 @@ def create_comment(request):
 {
     "id": "2",
     "username": "19103026"
+}
+'''
+
+# club follow/unfollow GET
+'''
+{
+    "username": "19103002"
+}
+'''
+
+
+# club follow/unfollow POST
+'''
+{
+    "username": "19103002",
+    "name": "Club1"
+}
+'''
+
+# member_request GET
+'''
+{
+    "username": "19103026"
+}
+'''
+
+# member_request POST
+'''
+{
+    "username": "19103002",
+    "name": "Club1"
+}
+'''
+
+# member_request_validation GET
+'''
+{
+    "student": "19103002"
+}
+'''
+
+# member_request_validation POST
+'''
+{
+    "student": "19103002",
+    "club": "Club1",
+    "accepted": true
+}
+'''
+
+# create_comment POST
+'''
+{
+    "comment_text": "This is comment1.",
+    "student": "19103002",
+    "event": "event_id"
 }
 '''

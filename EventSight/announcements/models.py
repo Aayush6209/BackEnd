@@ -31,7 +31,7 @@ class member_request(models.Model):
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, default=None)
     club = models.ForeignKey(Club, on_delete=models.CASCADE, default=None)
-    date_time = models.DateTimeField(auto_created=True)
+    date_time = models.DateTimeField(auto_now_add=True)
 
 
 class Event(models.Model):
@@ -55,13 +55,13 @@ class participation_request(models.Model):
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, default=None)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
-    date_time = models.DateTimeField(auto_created=True)
+    date_time = models.DateTimeField(auto_now_add=True)
 
 
 class Comment(models.Model):
 
     comment_text = models.CharField(max_length=2048)
-    date_time = models.DateTimeField(auto_created=True)
+    date_time = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, default=None)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
