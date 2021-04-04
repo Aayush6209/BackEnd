@@ -14,7 +14,7 @@ class student_login_serializer(forms.Form):
     fields = ['username', 'password']
 
 
-class universal_serializer(serializers.ModelSerializer):
+class student_serializer(serializers.ModelSerializer):
     # copy fields from models.py
     class Meta:
         model = Student
@@ -68,7 +68,7 @@ class create_event_serializer(forms.Form):
               'date_time', 'open_to_all', 'image_url', 'username']
 
 
-class get_username(forms.Form):
+class universal_serializer(forms.Form):
     username = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Username'}))
     fields = ['username']

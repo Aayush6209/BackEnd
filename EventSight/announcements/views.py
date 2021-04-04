@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Student, Club, Event, member_request, Comment
-from .serializers import student_serializer, student_login_serializer
+from .serializers import universal_serializer, student_login_serializer, student_serializer
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
 
@@ -18,7 +18,6 @@ user@gmail.com
 user@123
 """
 
-active_users = []
 
 
 @api_view(['GET', 'POST'])
@@ -50,27 +49,26 @@ def register_view(request):
 @api_view(['POST', 'GET'])
 def login_view(request):
     if request.method == "POST":
-        print("INSIDE POST LOGIN")
+        # print("INSIDE POST LOGIN")
         serializer = student_login_serializer(data=request.data)
         if serializer.is_valid():
-            # print("serializer is valid")
+            # # print("serializer is valid")
             username_pwd = serializer.data
             username = username_pwd["username"]
             password = username_pwd["password"]
-            print(username)
-            print(password)
+            # print(username)
+            # print(password)
             try:
                 student = Student.objects.get(username=username)
-                print("try success")
+                # print("try success")
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            print(student.password)
-            print(make_password(password))
+            # print(student.password)
+            # print(make_password(password))
             if check_password(password, student.password) is False:
                 return Response(status=status.HTTP_403_FORBIDDEN)
             events = Event.objects.all()
             serializer = event_serializer(events, many=True)
-            active_users.append(username)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
     elif request.method == "GET":
@@ -80,9 +78,8 @@ def login_view(request):
 @api_view(['POST'])
 def logout_view(request):
     if request.method == 'POST':
-        serializer = student_login_serializer(data=request.data)
-        username = serializer.data('username')
-        active_users.remove(username)
+        serializer = universal_serializer(data=request.data)
+        username = serializer.data['username']
         return Response(status=status.HTTP_200_OK)
 
 
@@ -91,10 +88,14 @@ def create_event(request):
     try:
         serializer = universal_serializer(data=request.data)
         admin = serializer.data["username"]
+        print("admin is:", admin)
     except:
+        # print("1")
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    if admin not in active_users:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    # if admin not in active_users:
+    #     # print("2")
+    #     # print(active_users)
+    #     return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         club = Club.objects.get(admin=admin)
     except:
@@ -133,8 +134,8 @@ def update_event(request, pk):
         admin = serializer.data["username"]
     except:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    if admin not in active_users:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    # if admin not in active_users:
+    #     return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         club = Club.objects.get(admin=admin)
     except:
@@ -162,68 +163,133 @@ def update_event(request, pk):
 def event_register(request):
     if request.method == 'GET':
         # return all those events where user is not registered
-        events = Event.objects.exclude(Student.objects.get(
-            username=request.user).participated_events)
-        serializer = event_serializer(events, many=True)
-        if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            events = Event.objects.all()
+            serializer = event_serializer(events, many=True)
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'POST':
         # add the student to participant list
-        serializer = event_serializer(data=request.data, many=True)
-        if serializer.is_valid():
-            pass
+        try:
+            serializer = universal_serializer(data=request.data)
+            event = Event.objects.get(pk=serializer.data["id"])
+            student = Student.objects.get(username=serializer.data["username"])
+            # if student not in active_users:
+            #     return Response(status=status.HTTP_401_UNAUTHORIZED)
+            if student in event.participants:
+                return Response({"message": "You are already registered!"}, status=status.HTTP_200_OK)
+            if event.open_to_all is True:
+                event.participants.add(student)
+                return Response({"message": "You are successfully registered!"}, status=status.HTTP_200_OK)
+            else:
+                if student in event.organizer.members:
+                    event.participants.add(student)
+                    return Response({"message": "You are successfully registered!"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "This event is only for members."}, status=status.HTTP_401_UNAUTHORIZED)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'POST'])
 def event_interested(request):
     if request.method == 'GET':
-        # return all those events where user is not interested
-        pass
+        # return all the events
+        try:
+            events = Event.objects.all()
+            serializer = event_serializer(events, many=True)
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'POST':
         # add the event to interest list
-        pass
-    pass
+        try:
+            serializer = universal_serializer(data=request.data)
+            event = Event.objects.get(pk=serializer.data["id"])
+            student = Student.objects.get(username=serializer.data["username"])
+            # if student not in active_users:
+            #     return Response(status=status.HTTP_401_UNAUTHORIZED)
+            if student in event.interested:
+                return Response({"message": "You are already interested!"}, status=status.HTTP_200_OK)
+            if event.open_to_all is True:
+                event.interested.add(student)
+                return Response({"message": "You are successfully added to interested list!"}, status=status.HTTP_200_OK)
+            else:
+                if student in event.organizer.members:
+                    event.interested.add(student)
+                    return Response({"message": "You are successfully added to interested list!"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "This event is only for members."}, status=status.HTTP_401_UNAUTHORIZED)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST'])
-def non_member_participation_request(request):
-    if request.method == 'GET':
-        pass
-    elif request.method == 'POST':
-        pass
-    pass
+# @api_view(['GET', 'POST'])
+# def non_member_participation_request(request):
+#     if request.method == 'GET':
+#         pass
+#     elif request.method == 'POST':
+#         pass
+#     pass
 
 
-@api_view(['GET', 'POST'])
-def non_member_participation_request_validation(request):
-    if request.method == 'GET':
-        pass
-    elif request.method == 'POST':
-        pass
-    pass
+# @api_view(['GET', 'POST'])
+# def non_member_participation_request_validation(request):
+#     if request.method == 'GET':
+#         pass
+#     elif request.method == 'POST':
+#         pass
+#     pass
 
 
 @api_view(['GET', 'POST'])
 def club_follow(request):
-    if request.method == 'GET':
+    serializer = universal_serializer(data=request.data)
+    username=serializer.data['username']
+    student = Student.objects.get(username=username)
+    if request.method == 'GET': ---
         # return all those clubs where user is not following
-        pass
+        follow_list = student.follow_list.filter()
+        ids = []
+        for i in follow_list:
+            ids.append(i.pk)
+        clubs_not_in_follow_list = Club.objects.exclude(pk__in=ids)
+        serializer = club_serializer(clubs_not_in_follow_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         # add the club to follow list
-        pass
-    pass
+        # TODO primary key need to be set
+        club_id = serializer.data["club_id"]
+        club = Club.objects.get(pk=club_id)
+        club.followers.add(student)
+        return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
 def club_unfollow(request):
+    serializer = universal_serializer(data=request.data)
+    username = serializer.data['username']
+    student = Student.objects.get(username=username)
     if request.method == 'GET':
-        # return all those clubs where user is following
-        pass
+        # return all those clubs where user is not following
+        follow_list = student.follow_list.filter()
+        ids = []
+        for i in follow_list:
+            ids.append(i.pk)
+        clubs_not_in_follow_list = Club.objects.filter(pk__in=ids)
+        serializer = club_serializer(clubs_not_in_follow_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        # remove the club to follow list
-        pass
-    pass
+        # add the club to follow list
+        club_id = serializer.data["club_id"]
+        club = Club.objects.get(pk=club_id)
+        club.followers.remove(username)
+        return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
@@ -240,12 +306,7 @@ def member_request(request):
 def member_request_validation(request):
     if request.method == 'GET':
         # return all those members who requested for membership
-        student = Student.objects.get(username=request.user)
-        club = student.club_admin
-        member_requests = member_request.objects.filter(club=club)
-        students = Student.objects.filter(username=member_requests.student)
-        serializer = student_serializer(students, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        pass
     elif request.method == 'POST':
         # if ACCEPTED
         # add the selected member to main list
@@ -275,25 +336,34 @@ def create_comment(request):
                 return Response(serializer.data, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# login
 '''
 {
-    "password": "Kites@123",
-    "username": "SuperUser"
+    "password": "user2@123",
+    "username": "19103002"
 }
 '''
 
-
+# register
 '''
 {
     "password": "user2@123",
     "username": "19103002",
     "first_name": "Person",
     "last_name": "2",
-    "email": "person2@gmail.com"
+    "email": "person2@gmail.com",
+    "branch": "CSE"
 }
 '''
 
+# logout
+'''
+{
+    "username": "19103002",
+}
+'''
+
+# create_event, update_event/pk
 '''
 {
     "title": "event2",
@@ -303,5 +373,14 @@ def create_comment(request):
     "open_to_all": "True",
     "image_url": "url",
     "username": "19103001"
+}
+'''
+
+# event_register
+# here id is event_id
+'''
+{
+    "id": "2",
+    "username": "19103026"
 }
 '''
