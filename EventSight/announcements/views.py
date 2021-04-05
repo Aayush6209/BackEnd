@@ -1,3 +1,4 @@
+from os import stat
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from rest_framework import response, serializers
@@ -81,6 +82,30 @@ def logout_view(request):
         serializer = universal_serializer(data=request.data)
         username = serializer.data['username']
         return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'POST'])
+def event_display(request):
+    serializer = universal_serializer(data=request.data)
+    student = serializer.data['student']
+    student = Student.objects.get(username=student)
+    if request.method == 'GET':
+        follow_list = student.follow_list.filter()
+        followed_club_events = Event.request.filter(organizer__in=follow_list)
+
+        events_open_to_all = Event.request.filter(open_to_all=True)
+
+        return Response(
+                    {
+                        "followed_club_events": event_serializer(followed_club_events, many=True).data,
+                        "events_open_to_all": event_serializer(events_open_to_all, many=True).data
+                    },
+                    status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        pk=serializer.data['pk']
+        return Response(event_serializer(Event.objects.get(pk=pk)).data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET', 'POST'])
@@ -229,6 +254,36 @@ def event_interested(request):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+def get_events_via_club(request):
+    serializer = universal_serializer(data=request.data)
+    club=serializer.data['club_id']
+    return Response(
+        event_serializer(club.event_organizers.filter(), many=True),
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['GET', 'POST'])
+def club_display(request):
+    serializer = universal_serializer(data=request.data)
+    # username = serializer.data['username']
+    # student = Student.objects.get(username=username)
+    if request.method == 'GET':
+        clubs = Club.objects.all()
+        return Response(
+                club_serializer(clubs, many=True).data,
+                status=status.HTTP_200_OK
+        )
+    elif request.method == 'POST':
+        pk = serializer.data['pk']
+        return Response(
+            club_serializer(Club.objects.get(pk=pk)).data,
+            status=status.HTTP_200_OK
+        )
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['GET', 'POST'])
 def club_follow(request):
     serializer = universal_serializer(data=request.data)
@@ -318,6 +373,7 @@ def member_request_validation(request):
         if accepted:
             # add the selected member to main list
             club.members.add(student)
+            club.followers.add(student)
         # remove them from member_request table
         return Response(status=status.HTTP_200_OK)
 
