@@ -1,6 +1,10 @@
 from django.db import models
 
-
+'''
+CREATE TABLE Student(
+    ---
+);
+'''
 class Student(models.Model):
     username = models.CharField(max_length=8, primary_key=True)
     password = models.CharField(max_length=1024)
@@ -50,12 +54,6 @@ class Event(models.Model):
     open_to_all = models.BooleanField()
     image_url = models.URLField()
 
-
-class participation_request(models.Model):
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, default=None)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
-    date_time = models.DateTimeField(auto_now_add=True)
 
 
 class Comment(models.Model):
