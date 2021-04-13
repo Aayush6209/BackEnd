@@ -7,11 +7,11 @@ from django import forms
 
 
 class student_login_serializer(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Username'}))
+    student_id = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'student_id'}))
     password = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Password'}))
-    fields = ['username', 'password']
+    fields = ['student_id', 'password']
 
 
 class student_serializer(serializers.ModelSerializer):
@@ -62,13 +62,13 @@ class create_event_serializer(forms.Form):
         attrs={'placeholder': 'open_to_all'}))
     image_url = forms.URLField(widget=forms.TextInput(
         attrs={'placeholder': 'image_url'}))
-    username = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Username'}))
+    student_id = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'student_id'}))
     fields = ['title', 'description', 'details',
-              'date_time', 'open_to_all', 'image_url', 'username']
+              'date_time', 'open_to_all', 'image_url', 'student_id']
 
 
 class universal_serializer(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Username'}))
-    fields = ['username']
+    student_id = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'student_id'}))
+    fields = ['student_id']

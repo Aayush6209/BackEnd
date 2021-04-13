@@ -2,18 +2,18 @@ from django.db import models
 
 '''
 CREATE TABLE Student(
-    username varchar(8),
+    student_id varchar(8),
     password varchar(1024),
     email varchar(1024),
     first_name varchar(64),
     last_name varchar(64),
     branch varchar(64),
-    primary key (username)
+    primary key (student_id)
     
 );
 '''
 class Student(models.Model):
-    username = models.CharField(max_length=8, primary_key=True)
+    student_id = models.CharField(max_length=8, primary_key=True)
     password = models.CharField(max_length=1024)
     email = models.EmailField(max_length=1024)
     first_name = models.CharField(max_length=64)
@@ -28,24 +28,24 @@ CREATE TABLE Club(
     description varchar(1024), 
     image_url varchar(2000),
     primary key (name),
-    foreign key (admin) references Student (username)
+    foreign key (admin) references Student (student_id)
     
 );
 '''
 '''
 CREATE TABLE followers(
-    username varchar(128),
+    student_id varchar(128),
     club_id int,
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (club_id) references Club (name)
     
 );
 '''
 '''
 CREATE TABLE members(
-    username varchar(128),
+    student_id varchar(128),
     club_id int,
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (club_id) references Club (name)
 );
 '''
@@ -72,7 +72,7 @@ CREATE TABLE member_request(
     club int, 
     date_time datetime, 
     foreign key (club) references Club (name),
-    foreign key (student) references Student (username)
+    foreign key (student) references Student (student_id)
     
 );
 '''
@@ -107,28 +107,28 @@ CREATE TABLE Event(
 '''
 '''
 CREATE TABLE interested(
-    username varchar(128),
+    student_id varchar(128),
     event_id int,
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (event_id) references Event (event_id)
     
 );
 '''
 '''
 CREATE TABLE participants(
-    username varchar(128),
+    student_id varchar(128),
     event_id int,
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (event_id) references Event (event_id)
     
 );
 '''
 '''
 CREATE TABLE participation_request(
-    username varchar(128),
+    student_id varchar(128),
     event_id int,
     date_time date,
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (event_id) references Event (event_id)
     
     
@@ -156,11 +156,11 @@ class Event(models.Model):
 CREATE TABLE Comment(
     comment_id int,
     comment_txt varchar(2048),
-    username varchar(128),
+    student_id varchar(128),
     event_id int,
     date_time date,
     primary key(comment_id),
-    foreign key (username) references Student (username),
+    foreign key (student_id) references Student (student_id),
     foreign key (event_id) references Event (event_id)
     
 );
@@ -173,3 +173,9 @@ class Comment(models.Model):
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, default=None)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
+
+
+class Token(models.Model):
+
+    student_id = models.CharField(max_length=8, primary_key=True)
+    token = models.CharField(max_length=32)
