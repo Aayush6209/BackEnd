@@ -37,7 +37,17 @@ def register_view(request):
                 student = Student.objects.create(
                     student_id=student_id, password=make_password(password), email=email, first_name=first_name, last_name=last_name, branch=branch)
                 student.save()
-                return Response(status=status.HTTP_201_CREATED)
+
+                events = Event.objects.all()
+                serializer = event_serializer(events, many=True)
+                new_token = Token.objects.create(
+                    student_id=student_id, token=get_random_string(length=32))
+                new_token.save()
+                return Response({"events": serializer.data,
+                                "student_id": new_token.student_id,
+                                "token": new_token.token
+                                }, status=status.HTTP_201_CREATED)
+                                
             except IntegrityError:
                 # student_id already takken or some integrity error
                 return Response(serializer.data, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
