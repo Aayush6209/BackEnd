@@ -78,13 +78,14 @@ def login_view(request):
             club_of_admin = Club.objects.get(name=club)
             if (club_of_admin.admin != student):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
-            
+
         credentials = student_serializer(student)
-        new_token = Token.objects.create(student_id=student_id, token=get_random_string(length=32))
+        new_token = Token.objects.create(
+            student_id=student_id, token=get_random_string(length=32))
         new_token.save()
         return Response({"credentials": credentials.data,
-                        "token": new_token.token
-                        }, status=status.HTTP_200_OK)
+                         "token": new_token.token
+                         }, status=status.HTTP_200_OK)
     elif request.method == "GET":
         return Response(status=status.HTTP_200_OK)
 
@@ -458,6 +459,7 @@ def create_comment(request):
 # token, student_id field REQUIRED in all the POST/GET methods.
 
 # login
+
 '''
 {
     "password": "user2@123",
