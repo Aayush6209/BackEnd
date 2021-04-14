@@ -62,28 +62,30 @@ def register_view(request):
 @api_view(['POST', 'GET'])
 def login_view(request):
     if request.method == "POST":
+        # print("INSIDE POST LOGIN")
         serializer = student_login_serializer(data=request.data)
         if serializer.is_valid():
-            student_id = serializer.data["student_id"]
-            password = serializer.data["password"]
-            role = serializer.data["role"]
-            club = serializer.data["club"]
+            # # print("serializer is valid")
+            student_id_pwd = serializer.data
+            student_id = student_id_pwd["student_id"]
+            password = student_id_pwd["password"]
+            # print(student_id)
+            # print(password)
             try:
                 student = Student.objects.get(student_id=student_id)
+                # print("try success")
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
+            # print(student.password)
+            # print(make_password(password))
             if check_password(password, student.password) is False:
                 return Response(status=status.HTTP_403_FORBIDDEN)
-
-            if (role == "Admin"):
-                club_of_admin = Club.objects.get(name=club)
-                if (club_of_admin.admin != student):
-                    return Response(status=status.HTTP_401_UNAUTHORIZED)
-                
-            credentials = student_serializer(student)
+            events = Event.objects.all()
+            serializer = event_serializer(events, many=True)
             new_token = Token.objects.create(student_id=student_id, token=get_random_string(length=32))
             new_token.save()
-            return Response({"credentials": credentials.data,
+            return Response({"events": serializer.data,
+                             "student_id": new_token.student_id,
                              "token": new_token.token
                              }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
