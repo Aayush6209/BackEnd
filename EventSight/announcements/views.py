@@ -38,15 +38,13 @@ def register_view(request):
                     student_id=student_id, password=make_password(password), email=email, first_name=first_name, last_name=last_name, branch=branch)
                 student.save()
 
-                events = Event.objects.all()
-                serializer = event_serializer(events, many=True)
+                credentials = student_serializer(student)
                 new_token = Token.objects.create(
                     student_id=student_id, token=get_random_string(length=32))
                 new_token.save()
-                return Response({"events": serializer.data,
-                                "student_id": new_token.student_id,
-                                "token": new_token.token
-                                }, status=status.HTTP_201_CREATED)
+                return Response({"credentials": credentials.data,
+                                 "token": new_token.token
+                                 }, status=status.HTTP_201_CREATED)
                                 
             except IntegrityError:
                 # student_id already takken or some integrity error
@@ -456,112 +454,3 @@ def create_comment(request):
         serializer = comment_serializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-# token, student_id field REQUIRED in all the POST/GET methods.
-
-# login
-
-'''
-{
-    "password": "user2@123",
-    "student_id": "19103002",
-    "role": "Admin/Student",
-    "club": "club-name"
-}
-'''
-
-# register
-'''
-{
-    "password": "user2@123",
-    "student_id": "19103002",
-    "first_name": "Person",
-    "last_name": "2",
-    "email": "person2@gmail.com",
-    "branch": "CSE"
-}
-'''
-
-# logout
-'''
-{
-    "student_id": "19103002",
-}
-'''
-
-# create_event, update_event/pk
-'''
-{
-    "title": "event2",
-    "description": "this is event2",
-    "details": "to be conducted at location2",
-    "date_time": "2006-10-25 14:30:59",
-    "open_to_all": "True",
-    "image_url": "url",
-    "student_id": "19103001"
-}
-'''
-
-# event_register
-# here id is event_id
-'''
-{
-    "id": "2",
-    "student_id": "19103026"
-}
-'''
-
-# club follow/unfollow GET
-'''
-{
-    "student_id": "19103002"
-}
-'''
-
-
-# club follow/unfollow POST
-'''
-{
-    "student_id": "19103002",
-    "name": "Club1"
-}
-'''
-
-# member_request GET
-'''
-{
-    "student_id": "19103026"
-}
-'''
-
-# member_request POST
-'''
-{
-    "student_id": "19103002",
-    "name": "Club1"
-}
-'''
-
-# member_request_validation GET
-'''
-{
-    "student": "19103002"
-}
-'''
-
-# member_request_validation POST
-'''
-{
-    "student": "19103002",
-    "club": "Club1",
-    "accepted": true
-}
-'''
-
-# create_comment POST
-'''
-{
-    "comment_text": "This is comment1.",
-    "student": "19103002",
-    "event": "event_id"
-}
-'''
