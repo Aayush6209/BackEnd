@@ -78,9 +78,13 @@ def login_view(request):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         credentials = student_serializer(student)
-        new_token = Token.objects.create(
-            student_id=student_id, token=get_random_string(length=32))
-        new_token.save()
+        try:
+            new_token = Token.objects.create(
+                student_id=student_id, token=get_random_string(length=32))
+            new_token.save()
+        except:
+            return Response({"message": "Already logged in on some other device!"},
+            status=status.HTTP_403_FORBIDDEN)
         return Response({"credentials": credentials.data,
                          "token": new_token.token
                          }, status=status.HTTP_200_OK)
@@ -140,12 +144,7 @@ def create_event(request):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         print("admin is:", admin)
     except:
-        # print("1")
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    # if admin not in active_users:
-    #     # print("2")
-    #     # print(active_users)
-    #     return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         club = Club.objects.get(admin=admin)
     except:
@@ -296,18 +295,22 @@ def event_interested(request):
 @api_view(['POST'])
 def get_events_via_club(request):
     serializer = universal_serializer(data=request.data)
-    club=serializer.data['club_id']
-    return Response(
-        event_serializer(club.event_organizers.filter(), many=True),
-        status=status.HTTP_200_OK
-    )
+    student = serializer.data["student_id"]
+    token_got = serializer.data['token']
+    token = Token.objects.get(student_id=student)
+    if (token.token != token_got):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    club = serializer.data['club_id']
+    if club in student.member_list:
+        events = Event.objects.filter(organizer=club)
+    else:
+        events = Event.objects.filter(organizer=club).filter(open_to_all=True)
+    return Response(event_serializer(events, many=True).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
 def club_display(request):
     serializer = universal_serializer(data=request.data)
-    # student_id = serializer.data['student_id']
-    # student = Student.objects.get(student_id=student_id)
     if request.method == 'GET':
         clubs = Club.objects.all()
         return Response(
@@ -315,9 +318,9 @@ def club_display(request):
                 status=status.HTTP_200_OK
         )
     elif request.method == 'POST':
-        pk = serializer.data['pk']
+        name = serializer.data['name']
         return Response(
-            club_serializer(Club.objects.get(pk=pk)).data,
+            club_serializer(Club.objects.get(name=name)).data,
             status=status.HTTP_200_OK
         )
     return Response(status=status.HTTP_400_BAD_REQUEST)
