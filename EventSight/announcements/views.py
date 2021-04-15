@@ -439,6 +439,22 @@ def member_request_validation(request):
 
 
 @api_view(['POST'])
+def remove_member(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student']
+        token_got = serializer.data['token']
+        name = serializer.data['name']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
+        club = Club.objects.get(name=name)
+        club.members.remove(student)
+        return Response(club_serializer(club).data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
 def create_comment(request):
     serializer = universal_serializer(data=request.data)
     student_id = serializer.data['student_id']
