@@ -454,6 +454,7 @@ def remove_member(request):
         return Response(club_serializer(club).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 def member_request_check(request):
     if request.method == 'POST':
@@ -473,6 +474,19 @@ def member_request_check(request):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response(status=status.HTTP_400_BAD_REQUEST)
     
+
+@api_view(['POST'])
+def fetch_club(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        name = serializer.data['name']
+        club = Club.objects.get(name=name)
+        try:
+            return Response(club_serializer(club).data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def create_comment(request):
