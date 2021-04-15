@@ -18,5 +18,6 @@ urlpatterns = [
     path('member_request/', create_member_request),
     path('member_request_verify/', member_request_validation),
     path('remove_member/', remove_member),
+    path('member_request_check/', member_request_check),
     path('create_comment/', create_comment)
 ]
