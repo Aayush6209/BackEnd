@@ -351,7 +351,7 @@ def club_follow(request):
         club_name = serializer.data["name"]
         club = Club.objects.get(pk=club_name)
         club.followers.add(student)
-        return Response(status=status.HTTP_200_OK)
+        return Response(club_serializer(club).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
@@ -377,7 +377,7 @@ def club_unfollow(request):
         club_name = serializer.data["name"]
         club = Club.objects.get(pk=club_name)
         club.followers.remove(student)
-        return Response(status=status.HTTP_200_OK)
+        return Response(club_serializer(club).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])
