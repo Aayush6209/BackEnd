@@ -411,7 +411,7 @@ def create_member_request(request):
 def member_request_validation(request):
     if request.method == 'GET':
         # return all those members who requested for membership
-        serializer = universal_serializer(data=request.queryparams)
+        serializer = universal_serializer(data=request.query_params)
         student_id = serializer.data['student_id']
         token_got = serializer.data['token']
         token = Token.objects.get(student_id=student_id)
@@ -420,7 +420,8 @@ def member_request_validation(request):
         student = Student.objects.get(student_id=student_id)
         club = Club.objects.get(name=student.club_admin.get().name)
         member_requests = member_request.objects.filter(club=club)
-        serializer = member_request_serializer(member_requests, many=True)
+        students = Student.objects.filter(student_id=member_requests.student_id)
+        serializer = student_serializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = universal_serializer(data=request.data)
