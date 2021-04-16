@@ -107,14 +107,14 @@ def logout_view(request):
 
 @api_view(['GET', 'POST'])
 def event_display(request):
-    serializer = universal_serializer(data=request.data)
-    student_id = serializer.data['student_id']
-    token_got = serializer.data['token']
-    token = Token.objects.get(student_id=student_id)
-    if (token.token != token_got):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    student = Student.objects.get(student_id=student_id)
     if request.method == 'GET':
+        serializer = universal_serializer(data=request.query_set)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
         follow_list = student.follow_list.filter()
         followed_club_events = Event.request.filter(organizer__in=follow_list)
 
@@ -127,6 +127,13 @@ def event_display(request):
                     },
                     status=status.HTTP_200_OK)
     elif request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
         pk=serializer.data['pk']
         return Response(event_serializer(Event.objects.get(pk=pk)).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -135,20 +142,17 @@ def event_display(request):
 
 @api_view(['GET', 'POST'])
 def create_event(request):
-    try:
+    if request.method == 'GET':
+        serializer = universal_serializer(data=request.query_set)
+    elif request.method == 'POST':
         serializer = universal_serializer(data=request.data)
-        admin = serializer.data["student_id"]
-        token_got = serializer.data['token']
-        token = Token.objects.get(student_id=admin)
-        if (token.token != token_got):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        print("admin is:", admin)
-    except:
+    admin = serializer.data["student_id"]
+    token_got = serializer.data['token']
+    token = Token.objects.get(student_id=admin)
+    if (token.token != token_got):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    try:
-        club = Club.objects.get(admin=admin)
-    except:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    print("admin is:", admin)
+    club = Club.objects.get(admin=admin)
     if request.method == 'GET':
         try:
             events = Event.objects.filter(organizer=club)
