@@ -414,6 +414,7 @@ def create_member_request(request):
 @api_view(['POST'])
 def get_members_requested(request):
     if request.method == 'POST':
+        print("HELLO WORLD")
         serializer = universal_serializer(data=request.data)
         student_id = serializer.data['student_id']
         token_got = serializer.data['token']
@@ -425,8 +426,8 @@ def get_members_requested(request):
         member_requests = member_request.objects.filter(club=club)
         student_ids = []
         for i in member_requests:
-            student_ids.append(i.student)
-        students = Student.objects.filter(student_id__in=student_ids)
+            student_ids.append(i.student.student_id)
+        students = Student.objects.filter(pk__in=student_ids)
         serializer = student_serializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
