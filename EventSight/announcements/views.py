@@ -409,20 +409,27 @@ def create_member_request(request):
 
 @api_view(['GET', 'POST'])
 def member_request_validation(request):
-    serializer = universal_serializer(data=request.data)
-    student_id = serializer.data['student_id']
-    token_got = serializer.data['token']
-    token = Token.objects.get(student_id=student_id)
-    if (token.token != token_got):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    student = Student.objects.get(student_id=student_id)
     if request.method == 'GET':
         # return all those members who requested for membership
+        serializer = universal_serializer(data=request.queryparams)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
         club = Club.objects.get(name=student.club_admin.get().name)
         member_requests = member_request.objects.filter(club=club)
         serializer = member_request_serializer(member_requests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
         club = Club.objects.get(name=serializer.data["club"])
         print(club)
         print(student)
