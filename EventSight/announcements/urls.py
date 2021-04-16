@@ -17,6 +17,7 @@ urlpatterns = [
     path('club_unfollow/', club_unfollow),
     path('member_request/', create_member_request),
     path('member_request_verify/', member_request_validation),
+    path('get_members_requested/', get_members_requested),
     path('remove_member/', remove_member),
     path('member_request_check/', member_request_check),
     path('fetch_club/', fetch_club),

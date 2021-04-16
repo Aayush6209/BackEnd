@@ -407,6 +407,27 @@ def create_member_request(request):
         return Response(status=status.HTTP_200_OK)
 
 
+@api_view(['POST'])
+def get_members_requested(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        admin = Student.objects.get(student_id=student_id)
+        club = Club.objects.get(name=admin.club_admin.get().name)
+        member_requests = member_request.objects.filter(club=club)
+        student_ids = []
+        for i in member_requests:
+            student_ids.append(i.student)
+        students = Student.objects.filter(student_id__in=student_ids)
+        serializer = student_serializer(students, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(['GET', 'POST'])
 def member_request_validation(request):
     if request.method == 'GET':
