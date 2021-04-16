@@ -420,7 +420,10 @@ def member_request_validation(request):
         student = Student.objects.get(student_id=student_id)
         club = Club.objects.get(name=student.club_admin.get().name)
         member_requests = member_request.objects.filter(club=club)
-        students = Student.objects.filter(student_id=member_requests.student)
+        student_ids = []
+        for i in member_requests:
+            student_ids.append(i.student)
+        students = Student.objects.filter(student_id__in=student_ids)
         serializer = student_serializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
