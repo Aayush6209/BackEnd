@@ -115,16 +115,24 @@ def event_display(request):
         if (token.token != token_got):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         student = Student.objects.get(student_id=student_id)
+        
         follow_list = student.follow_list.all()
         follow_list_club_ids = []
         for i in follow_list:
             follow_list_club_ids.append(i.name)
-        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids)
-        events_open_to_all = Event.objects.filter(open_to_all=True)
+        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids).filter(open_to_all=True)
+
+        member_list = student.member_list.all()
+        member_list_club_ids = []
+        for i in member_list:
+            member_list_club_ids.append(i.name)
+        member_club_events = Event.objects.filter(
+            organizer__in=member_list_club_ids)
+        # events_open_to_all = Event.objects.filter(open_to_all=True)
         return Response(
                     {
                         "followed_club_events": event_serializer(followed_club_events, many=True).data,
-                        "events_open_to_all": event_serializer(events_open_to_all, many=True).data
+                        "member_club_events": event_serializer(member_club_events, many=True).data
                     },
                     status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
