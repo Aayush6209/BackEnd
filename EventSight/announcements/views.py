@@ -105,28 +105,9 @@ def logout_view(request):
         return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def event_display(request):
-    if request.method == 'GET':
-        serializer = universal_serializer(data=request.query_params)
-        student_id = serializer.data['student_id']
-        token_got = serializer.data['token']
-        token = Token.objects.get(student_id=student_id)
-        if (token.token != token_got):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        student = Student.objects.get(student_id=student_id)
-        follow_list = student.follow_list.filter()
-        followed_club_events = Event.request.filter(organizer__in=follow_list)
-
-        events_open_to_all = Event.request.filter(open_to_all=True)
-
-        return Response(
-                    {
-                        "followed_club_events": event_serializer(followed_club_events, many=True).data,
-                        "events_open_to_all": event_serializer(events_open_to_all, many=True).data
-                    },
-                    status=status.HTTP_200_OK)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         serializer = universal_serializer(data=request.data)
         student_id = serializer.data['student_id']
         token_got = serializer.data['token']
@@ -134,9 +115,52 @@ def event_display(request):
         if (token.token != token_got):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         student = Student.objects.get(student_id=student_id)
-        pk=serializer.data['pk']
-        return Response(event_serializer(Event.objects.get(pk=pk)).data, status=status.HTTP_200_OK)
+        follow_list = student.follow_list
+        follow_list_club_ids = []
+        for i in follow_list:
+            follow_list_club_ids.append(i.name)
+        followed_club_events = Event.request.filter(organizer__in=follow_list_club_ids)
+        events_open_to_all = Event.request.filter(open_to_all=True)
+        return Response(
+                    {
+                        "followed_club_events": event_serializer(followed_club_events, many=True).data,
+                        "events_open_to_all": event_serializer(events_open_to_all, many=True).data
+                    },
+                    status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# @api_view(['GET', 'POST'])
+# def event_display(request):
+#     if request.method == 'GET':
+#         serializer = universal_serializer(data=request.query_params)
+#         student_id = serializer.data['student_id']
+#         token_got = serializer.data['token']
+#         token = Token.objects.get(student_id=student_id)
+#         if (token.token != token_got):
+#             return Response(status=status.HTTP_401_UNAUTHORIZED)
+#         student = Student.objects.get(student_id=student_id)
+#         follow_list = student.follow_list.filter()
+#         followed_club_events = Event.request.filter(organizer__in=follow_list)
+
+#         events_open_to_all = Event.request.filter(open_to_all=True)
+
+#         return Response(
+#                     {
+#                         "followed_club_events": event_serializer(followed_club_events, many=True).data,
+#                         "events_open_to_all": event_serializer(events_open_to_all, many=True).data
+#                     },
+#                     status=status.HTTP_200_OK)
+#     elif request.method == 'POST':
+#         serializer = universal_serializer(data=request.data)
+#         student_id = serializer.data['student_id']
+#         token_got = serializer.data['token']
+#         token = Token.objects.get(student_id=student_id)
+#         if (token.token != token_got):
+#             return Response(status=status.HTTP_401_UNAUTHORIZED)
+#         student = Student.objects.get(student_id=student_id)
+#         pk=serializer.data['pk']
+#         return Response(event_serializer(Event.objects.get(pk=pk)).data, status=status.HTTP_200_OK)
+#     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 
