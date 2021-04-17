@@ -108,7 +108,7 @@ def logout_view(request):
 @api_view(['GET', 'POST'])
 def event_display(request):
     if request.method == 'GET':
-        serializer = universal_serializer(data=request.query_set)
+        serializer = universal_serializer(data=request.query_params)
         student_id = serializer.data['student_id']
         token_got = serializer.data['token']
         token = Token.objects.get(student_id=student_id)
@@ -143,7 +143,7 @@ def event_display(request):
 @api_view(['GET', 'POST'])
 def create_event(request):
     if request.method == 'GET':
-        serializer = universal_serializer(data=request.query_set)
+        serializer = universal_serializer(data=request.query_params)
     elif request.method == 'POST':
         serializer = universal_serializer(data=request.data)
     admin = serializer.data["student_id"]
@@ -427,7 +427,11 @@ def get_members_requested(request):
         student_ids = []
         for i in member_requests:
             student_ids.append(i.student.student_id)
+        # print(student_ids)
+        # for i in student_ids:
+        #     print(i.student_id)
         students = Student.objects.filter(pk__in=student_ids)
+        print(students)
         serializer = student_serializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
