@@ -458,15 +458,14 @@ def member_request_validation(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = universal_serializer(data=request.data)
-        student_id = serializer.data['student_id']
+        admin_id = serializer.data['admin_id']
         token_got = serializer.data['token']
-        token = Token.objects.get(student_id=student_id)
+        token = Token.objects.get(student_id=admin_id)
         if (token.token != token_got):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student_id = serializer.data['student_id']
         student = Student.objects.get(student_id=student_id)
         club = Club.objects.get(name=serializer.data["club"])
-        print(club)
-        print(student)
         accepted = serializer.data["accepted"]
         member_requested = member_request.objects.get(student=student, club=club)
         member_requested.delete()
