@@ -11,6 +11,7 @@ from .serializers import universal_serializer, student_login_serializer, student
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
 from django.utils.crypto import get_random_string
+from datetime import datetime
 
 
 # Create your views here.
@@ -120,14 +121,14 @@ def event_display(request):
         follow_list_club_ids = []
         for i in follow_list:
             follow_list_club_ids.append(i.name)
-        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids).filter(open_to_all=True)
+        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids).filter(open_to_all=True).filter(date_time__gt=datetime.now()).order_by('date_time')
 
         member_list = student.member_list.all()
         member_list_club_ids = []
         for i in member_list:
             member_list_club_ids.append(i.name)
         member_club_events = Event.objects.filter(
-            organizer__in=member_list_club_ids)
+            organizer__in=member_list_club_ids).filter(date_time__gt=datetime.now()).order_by('date_time')
         # events_open_to_all = Event.objects.filter(open_to_all=True)
         return Response(
                     {
