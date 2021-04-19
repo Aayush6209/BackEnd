@@ -151,10 +151,10 @@ def interested_participated_events(request):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         student = Student.objects.get(student_id=student_id)
         if interested:
-            events = Event.objects.filter(interested=student).order_by('date_time')
+            events = Event.objects.filter(interested=student).filter(date_time__gt=datetime.time()).order_by('date_time')
         else:
             events = Event.objects.filter(
-                participants=student).order_by('date_time')
+                participants=student).filter(date_time__gt=datetime.time()).order_by('date_time')
         serializer = event_serializer(events, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
