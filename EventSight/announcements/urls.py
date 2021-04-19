@@ -21,5 +21,6 @@ urlpatterns = [
     path('remove_member/', remove_member),
     path('member_request_check/', member_request_check),
     path('fetch_club/', fetch_club),
-    path('create_comment/', create_comment)
+    path('create_comment/', create_comment),
+    path('interested_participated_events/', interested_participated_events),
 ]
