@@ -318,6 +318,26 @@ def event_interested(request):
 
 
 @api_view(['POST'])
+def all_interested_participants(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        admin_id = serializer.data['admin_id']
+        token_got = serializer.data['token']
+        interested = serializer.data['interested']
+        event_id = serializer.data['event_id']
+        token = Token.objects.get(student_id=admin_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        event = Event.objects.get(pk=event_id)
+        if interested:
+            students = event.interested.all()
+        else:
+            students = event.participants.all()
+        return Response(student_serializer(students, many=True).data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
 def get_events_via_club(request):
     serializer = universal_serializer(data=request.data)
     student = serializer.data["student_id"]

@@ -23,4 +23,5 @@ urlpatterns = [
     path('fetch_club/', fetch_club),
     path('create_comment/', create_comment),
     path('interested_participated_events/', interested_participated_events),
+    path('all_interested_participants/', all_interested_participants),
 ]
