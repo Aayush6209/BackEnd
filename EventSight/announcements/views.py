@@ -615,8 +615,11 @@ def display_comments(request):
         event_id = serializer.data['event_id']
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
         student_ids = []
+        data = []
         for comment in comments:
-            student_ids.append(comment.student.student_id)
-        students = Student.objects.filter(pk__in=student_ids)
-        return Response({"students": student_serializer(students, many=True).data, "comments": comment_serializer(comments, many=True).data}, status=status.HTTP_200_OK)
+            student = Student.objects.get(pk=comment.student.student_id)
+            data.append(
+                f"{student.pk},{student.first_name},{student.last_name},{comment.comment_text},{comment.date_time}"
+            )
+        return Response({"data": data}, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
