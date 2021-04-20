@@ -129,7 +129,6 @@ def event_display(request):
             member_list_club_ids.append(i.name)
         member_club_events = Event.objects.filter(
             organizer__in=member_list_club_ids).filter(date_time__gt=datetime.now()).order_by('date_time')
-        # events_open_to_all = Event.objects.filter(open_to_all=True)
         return Response(
                     {
                         "followed_club_events": event_serializer(followed_club_events, many=True).data,
@@ -212,8 +211,6 @@ def update_event(request, pk):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
     except:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    # if admin not in active_users:
-    #     return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         club = Club.objects.get(admin=admin)
     except:
@@ -258,8 +255,6 @@ def event_register(request):
             if (token.token != token_got):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             student = Student.objects.get(student_id=student_id)
-            # if student not in active_users:
-            #     return Response(status=status.HTTP_401_UNAUTHORIZED)
             if student in event.participants:
                 return Response({"message": "You are already registered!"}, status=status.HTTP_200_OK)
             if event.open_to_all is True:
@@ -299,8 +294,6 @@ def event_interested(request):
             if (token.token != token_got):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             student = Student.objects.get(student_id=student_id)
-            # if student not in active_users:
-            #     return Response(status=status.HTTP_401_UNAUTHORIZED)
             if student in event.interested:
                 return Response({"message": "You are already interested!"}, status=status.HTTP_200_OK)
             if event.open_to_all is True:
@@ -347,9 +340,9 @@ def get_events_via_club(request):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     club = serializer.data['club_id']
     if club in student.member_list:
-        events = Event.objects.filter(organizer=club)
+        events = Event.objects.filter(organizer=club).order_by('date_time')
     else:
-        events = Event.objects.filter(organizer=club).filter(open_to_all=True)
+        events = Event.objects.filter(organizer=club).filter(open_to_all=True).order_by('date_time')
     return Response(event_serializer(events, many=True).data, status=status.HTTP_200_OK)
 
 
@@ -468,9 +461,6 @@ def get_members_requested(request):
         student_ids = []
         for i in member_requests:
             student_ids.append(i.student.student_id)
-        # print(student_ids)
-        # for i in student_ids:
-        #     print(i.student_id)
         students = Student.objects.filter(pk__in=student_ids)
         print(students)
         serializer = student_serializer(students, many=True)
