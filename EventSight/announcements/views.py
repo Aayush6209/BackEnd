@@ -118,14 +118,14 @@ def event_display(request):
         follow_list_club_ids = []
         for i in follow_list:
             follow_list_club_ids.append(i.name)
-        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids).filter(open_to_all=True).filter(date_time__gt=datetime.now()).order_by('date_time')
+        followed_club_events = Event.objects.filter(organizer__in=follow_list_club_ids).filter(open_to_all=True).filter(date_time__gt=datetime.now()).order_by('date_time').reverse()
 
         member_list = student.member_list.all()
         member_list_club_ids = []
         for i in member_list:
             member_list_club_ids.append(i.name)
         member_club_events = Event.objects.filter(
-            organizer__in=member_list_club_ids).filter(date_time__gt=datetime.now()).order_by('date_time')
+            organizer__in=member_list_club_ids).filter(date_time__gt=datetime.now()).order_by('date_time').reverse()
         return Response(
                     {
                         "followed_club_events": event_serializer(followed_club_events, many=True).data,
@@ -147,10 +147,10 @@ def interested_participated_events(request):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         student = Student.objects.get(student_id=student_id)
         if interested:
-            events = Event.objects.filter(interested=student).filter(date_time__gt=datetime.now()).order_by('date_time')
+            events = Event.objects.filter(interested=student).filter(date_time__gt=datetime.now()).order_by('date_time').reverse()
         else:
             events = Event.objects.filter(
-                participants=student).filter(date_time__gt=datetime.now()).order_by('date_time')
+                participants=student).filter(date_time__gt=datetime.now()).order_by('date_time').reverse()
         serializer = event_serializer(events, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -339,9 +339,9 @@ def get_events_via_club(request):
     student = Student.objects.get(pk=student_id)
     club = Club.objects.get(pk=club_id)
     if club in student.member_list.all():
-        events = Event.objects.filter(organizer=club).order_by('date_time')
+        events = Event.objects.filter(organizer=club).order_by('date_time').reverse()
     else:
-        events = Event.objects.filter(organizer=club).filter(open_to_all=True).order_by('date_time')
+        events = Event.objects.filter(organizer=club).filter(open_to_all=True).order_by('date_time').reverse()
     return Response(event_serializer(events, many=True).data, status=status.HTTP_200_OK)
 
 
