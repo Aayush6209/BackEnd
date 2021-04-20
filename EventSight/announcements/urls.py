@@ -25,4 +25,5 @@ urlpatterns = [
     path('interested_participated_events/', interested_participated_events),
     path('all_interested_participants/', all_interested_participants),
     path('get_event_via_id/', get_event_via_id),
+    path('remove_interest_participation/', remove_interest_participation),
 ]

@@ -597,3 +597,23 @@ def get_event_via_id(request):
                 Event.objects.get(pk=universal_serializer(data=request.data).data['event_id'])).data,
                 status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def remove_interest_participation(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student_id']
+        token_got = serializer.data['token']
+        event_id = serializer.data['event_id']
+        interested = serializer.data['interested']
+        token = Token.objects.get(student_id=student_id)
+        if (token.token != token_got):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        student = Student.objects.get(student_id=student_id)
+        event = Event.objects.get(pk=event_id)
+        if interested:
+            event.interested.remove(student)
+        else:
+            event.participants.remove(student)
+        return Response(event_serializer(event).data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_502_BAD_GATEWAY)
