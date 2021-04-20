@@ -588,3 +588,12 @@ def create_comment(request):
         serializer = comment_serializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+@api_view(['POST'])
+def get_event_via_id(request):
+    if request.method == 'POST':
+        return Response(
+            event_serializer(
+                Event.objects.get(pk=universal_serializer(data=request.data).data['event_id'])).data,
+                status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
