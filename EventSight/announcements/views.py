@@ -569,7 +569,7 @@ def create_comment(request):
     student = Student.objects.get(student_id=student_id)
     if request.method == 'POST':
         comment_text = serializer.data['comment_text']
-        event = Event.objects.get(pk=serializer.data['event'])
+        event = Event.objects.get(pk=serializer.data['event_id'])
         new_comment = Comment.objects.create(
             student=student, comment_text=comment_text, event=event)
         new_comment.save()
@@ -614,7 +614,6 @@ def display_comments(request):
         serializer = universal_serializer(data=request.data)
         event_id = serializer.data['event_id']
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
-        student_ids = []
         data = []
         for comment in comments:
             student = Student.objects.get(pk=comment.student.student_id)
