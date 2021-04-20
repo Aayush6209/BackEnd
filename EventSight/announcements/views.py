@@ -617,3 +617,13 @@ def remove_interest_participation(request):
             event.participants.remove(student)
         return Response(event_serializer(event).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
+
+
+@api_view(['POST'])
+def display_comments(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        event_id = serializer.data['event_id']
+        comments = Comment.objects.filter(event__id=event_id)
+        return Response(comment_serializer(comments, many=True).data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_502_BAD_GATEWAY)
