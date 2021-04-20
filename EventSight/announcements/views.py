@@ -330,13 +330,15 @@ def all_interested_participants(request):
 @api_view(['POST'])
 def get_events_via_club(request):
     serializer = universal_serializer(data=request.data)
-    student = serializer.data["student_id"]
+    student_id = serializer.data['student_id']
     token_got = serializer.data['token']
-    token = Token.objects.get(student_id=student)
+    token = Token.objects.get(student_id=student_id)
     if (token.token != token_got):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    club = serializer.data['club_id']
-    if club in student.member_list:
+    club_id = serializer.data['club_id']
+    student = Student.objects.get(pk=student_id)
+    club = Club.objects.get(pk=club_id)
+    if club in student.member_list.all():
         events = Event.objects.filter(organizer=club).order_by('date_time')
     else:
         events = Event.objects.filter(organizer=club).filter(open_to_all=True).order_by('date_time')
