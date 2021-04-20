@@ -1,7 +1,4 @@
-from os import stat
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from rest_framework import response, serializers
+from django.http import HttpResponse
 from .serializers import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
