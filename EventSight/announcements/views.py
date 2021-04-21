@@ -594,7 +594,7 @@ def remove_interest_participation(request):
             event.interested.remove(student)
         else:
             event.participants.remove(student)
-        return Response(event_serializer(event).data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
 
 
