@@ -323,7 +323,12 @@ def all_interested_participants(request):
             students = event.interested.all()
         else:
             students = event.participants.all()
-        return Response(student_serializer(students, many=True).data, status=status.HTTP_200_OK)
+        data = []
+        for student in students:
+            data.append(
+                f"{student.student_id},{student.first_name},{student.last_name},{student.email},{student.branch}"
+            )
+        return Response({"data": data}, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -447,7 +452,6 @@ def create_member_request(request):
 @api_view(['POST'])
 def get_members_requested(request):
     if request.method == 'POST':
-        print("HELLO WORLD")
         serializer = universal_serializer(data=request.data)
         student_id = serializer.data['student_id']
         token_got = serializer.data['token']
@@ -461,32 +465,18 @@ def get_members_requested(request):
         for i in member_requests:
             student_ids.append(i.student.student_id)
         students = Student.objects.filter(pk__in=student_ids)
-        print(students)
-        serializer = student_serializer(students, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = []
+        for student in students:
+            data.append(
+                f"{student.student_id},{student.first_name},{student.last_name},{student.email},{student.branch}"
+            )
+        return Response({"data": data}, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def member_request_validation(request):
-    if request.method == 'GET':
-        # return all those members who requested for membership
-        serializer = universal_serializer(data=request.query_params)
-        student_id = serializer.data['student_id']
-        token_got = serializer.data['token']
-        token = Token.objects.get(student_id=student_id)
-        if (token.token != token_got):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        student = Student.objects.get(student_id=student_id)
-        club = Club.objects.get(name=student.club_admin.get().name)
-        member_requests = member_request.objects.filter(club=club)
-        student_ids = []
-        for i in member_requests:
-            student_ids.append(i.student)
-        students = Student.objects.filter(student_id__in=student_ids)
-        serializer = student_serializer(students, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         serializer = universal_serializer(data=request.data)
         admin_id = serializer.data['admin_id']
         token_got = serializer.data['token']
