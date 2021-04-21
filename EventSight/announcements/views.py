@@ -252,13 +252,13 @@ def event_register(request):
             if (token.token != token_got):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             student = Student.objects.get(student_id=student_id)
-            if student in event.participants:
+            if student in event.participants.all():
                 return Response({"message": "You are already registered!"}, status=status.HTTP_200_OK)
             if event.open_to_all is True:
                 event.participants.add(student)
                 return Response({"message": "You are successfully registered!"}, status=status.HTTP_200_OK)
             else:
-                if student in event.organizer.members:
+                if student in event.organizer.members.all():
                     event.participants.add(student)
                     return Response({"message": "You are successfully registered!"}, status=status.HTTP_200_OK)
                 else:
@@ -291,13 +291,13 @@ def event_interested(request):
             if (token.token != token_got):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             student = Student.objects.get(student_id=student_id)
-            if student in event.interested:
+            if student in event.interested.all():
                 return Response({"message": "You are already interested!"}, status=status.HTTP_200_OK)
             if event.open_to_all is True:
                 event.interested.add(student)
                 return Response({"message": "You are successfully added to interested list!"}, status=status.HTTP_200_OK)
             else:
-                if student in event.organizer.members:
+                if student in event.organizer.members.all():
                     event.interested.add(student)
                     return Response({"message": "You are successfully added to interested list!"}, status=status.HTTP_200_OK)
                 else:
