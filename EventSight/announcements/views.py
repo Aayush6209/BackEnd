@@ -594,11 +594,5 @@ def display_comments(request):
         serializer = universal_serializer(data=request.data)
         event_id = serializer.data['event_id']
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
-        student_ids = []
-        for comment in comments:
-            student_ids.append(comment.student.pk)
-        students = Student.objects.filter(pk__in=student_ids)
-        return Response(
-            student_serializer_without_password(students, many=True).data, status=status.HTTP_200_OK
-        )
+        return Response(comment_serializer_with_student(comments, many=True).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
