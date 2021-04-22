@@ -323,12 +323,7 @@ def all_interested_participants(request):
             students = event.interested.all()
         else:
             students = event.participants.all()
-        data = []
-        for student in students:
-            data.append(
-                f"{student.student_id},{student.first_name},{student.last_name},{student.email},{student.branch}"
-            )
-        return Response({"data": data}, status=status.HTTP_200_OK)
+        return Response(student_serializer_without_password(students, many=True), status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -465,12 +460,7 @@ def get_members_requested(request):
         for i in member_requests:
             student_ids.append(i.student.student_id)
         students = Student.objects.filter(pk__in=student_ids)
-        data = []
-        for student in students:
-            data.append(
-                f"{student.student_id},{student.first_name},{student.last_name},{student.email},{student.branch}"
-            )
-        return Response({"data": data}, status=status.HTTP_200_OK)
+        return Response(student_serializer_without_password(students, many=True), status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -604,11 +594,11 @@ def display_comments(request):
         serializer = universal_serializer(data=request.data)
         event_id = serializer.data['event_id']
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
-        data = []
+        student_ids = []
         for comment in comments:
-            student = Student.objects.get(pk=comment.student.student_id)
-            data.append(
-                f"{student.pk},{student.first_name},{student.last_name},{comment.comment_text},{comment.date_time}"
-            )
-        return Response({"data": data}, status=status.HTTP_200_OK)
+            student_ids.append(comment.student.pk)
+        students = Student.objects.filter(pk__in=student_ids)
+        return Response(
+            student_serializer_without_password(students, many=True).data, status=status.HTTP_200_OK
+        )
     return Response(status=status.HTTP_502_BAD_GATEWAY)

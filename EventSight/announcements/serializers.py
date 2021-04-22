@@ -21,6 +21,13 @@ class student_serializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class student_serializer_without_password(serializers.ModelSerializer):
+    # copy fields from models.py
+    class Meta:
+        model = Student
+        fields = ("student_id", "first_name", "last_name", "email", "branch")
+
+
 class club_serializer(serializers.ModelSerializer):
     # copy fields from models.py
     class Meta:
