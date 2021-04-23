@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Student, Club, Event, Token, member_request, Comment
-from .serializers import universal_serializer, student_login_serializer, student_serializer
+from .serializers import *
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
 from django.utils.crypto import get_random_string
@@ -101,6 +101,7 @@ def token_check(request):
         return True
     except:
         return False
+
 
 @api_view(['POST'])
 def logout_view(request):

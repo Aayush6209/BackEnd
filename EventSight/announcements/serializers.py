@@ -1,35 +1,18 @@
 from django.db.models import fields
 from rest_framework import serializers
-from .models import Student, Club, member_request, Event, Comment
+from .models import Student, Club, Token, member_request, Event, Comment
 from django import forms
 
 # these are serializers
 
 
-class student_login_serializer(forms.Form):
-    student_id = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'student_id'}))
-    password = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Password'}))
-    fields = ['student_id', 'password']
-
-
 class student_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
     class Meta:
         model = Student
         fields = '__all__'
 
 
-class student_serializer_without_password(serializers.ModelSerializer):
-    # copy fields from models.py
-    class Meta:
-        model = Student
-        fields = ("student_id", "first_name", "last_name", "email", "branch")
-
-
 class club_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
     class Meta:
         model = Club
         fields = '__all__'
@@ -54,6 +37,40 @@ class comment_serializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+
+
+class token_serializer(serializers.ModelSerializer):
+    # copy fields from models.py
+    class Meta:
+        model = Token
+        fields = '__all__'
+
+
+class student_login_serializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = '__all__'
+    
+
+
+
+
+class student_serializer_without_password(serializers.ModelSerializer):
+    # copy fields from models.py
+    class Meta:
+        model = Student
+        fields = ("student_id", "first_name", "last_name", "email", "branch")
+
+
+
+
+
+
+
+
+
 
 
 class comment_serializer_with_student(serializers.ModelSerializer):
