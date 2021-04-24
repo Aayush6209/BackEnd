@@ -3,7 +3,7 @@ from .serializers import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Student, Club, Event, Token, member_request, Comment
+from .models import Student, Club, Event, Token, member_request, Comment, IMAGES
 from .serializers import *
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
@@ -583,3 +583,49 @@ def display_comments(request):
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
         return Response(comment_serializer_with_student(comments, many=True).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
+
+
+@api_view(['POST'])
+def upload_view(request):
+    if request.method == 'POST':
+        serializer = universal_serializer(data=request.data)
+        image = IMAGES.objects.create(
+            name=serializer.data['name'],
+            photo=serializer.data['photo']
+        )
+        image.save()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+def update_view(request, pk):
+    if request.method == 'PUT':
+        image = IMAGES.objects.get(pk=pk)
+        serializer = universal_serializer(data=request.data)
+        image.name = serializer.data['name']
+        image.photo = serializer.data['photo']
+        image.save()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def delete_view(request, pk):
+    if request.method == 'DELETE':
+        image = IMAGES.objects.get(pk=pk)
+        image.delete()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def download_view(request, pk):
+    if request.method == 'GET':
+        image = IMAGES.objects.get(pk=pk)
+
+        return Response(
+            {"path": f"{'uploads'}/{image.name}"},
+            status=status.HTTP_200_OK
+        )
+    return Response(status=status.HTTP_400_BAD_REQUEST)

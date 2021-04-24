@@ -64,3 +64,7 @@ class Token(models.Model):
 
     student_id = models.CharField(max_length=8, primary_key=True)
     token = models.CharField(max_length=32)
+
+class IMAGES(models.Model):
+    name = models.CharField(max_length=128, primary_key=True)
+    photo = models.ImageField(upload_to='uploads/')
