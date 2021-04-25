@@ -1,5 +1,6 @@
 from django.urls import path
-
+from django.conf.urls.static import static
+from django.conf import settings
 from .views import *
 
 urlpatterns = [
@@ -27,8 +28,6 @@ urlpatterns = [
     path('get_event_via_id/', get_event_via_id),
     path('remove_interest_participation/', remove_interest_participation),
     path('display_comments/', display_comments),
-    path('upload/', upload_view),
-    path('update/<int:pk>/', update_view),
-    path('delete/<int:pk>/', delete_view),
-    path('download/<int:pk>', download_view),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

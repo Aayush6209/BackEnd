@@ -22,6 +22,7 @@ class Club(models.Model):
     members = models.ManyToManyField(
         Student, blank=True, related_name="member_list")
     image_url = models.URLField()
+    club_picture = models.ImageField(upload_to='club_uploads/', blank=True)
 
     def __str__(self):
         return f"{self.name}, administered by: {self.admin}"
@@ -49,6 +50,7 @@ class Event(models.Model):
         Student, blank=True, related_name="participated_events")
     open_to_all = models.BooleanField()
     image_url = models.URLField()
+    photo = models.ImageField(upload_to="upload/", blank=True)
 
 
 class Comment(models.Model):
@@ -65,6 +67,6 @@ class Token(models.Model):
     student_id = models.CharField(max_length=8, primary_key=True)
     token = models.CharField(max_length=32)
 
-class IMAGES(models.Model):
-    name = models.CharField(max_length=128, primary_key=True)
-    photo = models.ImageField(upload_to='uploads/')
+# class IMAGES(models.Model):
+#     name = models.CharField(max_length=128, primary_key=True)
+#     photo = models.ImageField(upload_to='uploads/')
