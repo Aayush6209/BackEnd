@@ -454,7 +454,7 @@ def get_members_requested(request):
         for i in member_requests:
             student_ids.append(i.student.student_id)
         students = Student.objects.filter(pk__in=student_ids)
-        return Response(student_serializer_without_password(students, many=True), status=status.HTTP_200_OK)
+        return Response(student_serializer_without_password(students, many=True).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Club, Token, member_request, Event, Comment
+from .models import Student, Club, Token, member_request, Event, Comment, IMAGES
 
 # Register your models here.
 admin.site.register(Student)
@@ -8,3 +8,4 @@ admin.site.register(member_request)
 admin.site.register(Event)
 admin.site.register(Comment)
 admin.site.register(Token)
+admin.site.register(IMAGES)
