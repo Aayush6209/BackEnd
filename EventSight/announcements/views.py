@@ -325,7 +325,7 @@ def all_interested_participants(request):
             students = event.interested.all()
         else:
             students = event.participants.all()
-        return Response(student_serializer_without_password(students, many=True), status=status.HTTP_200_OK)
+        return Response(student_serializer_without_password(students, many=True).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
