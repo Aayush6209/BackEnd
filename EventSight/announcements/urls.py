@@ -28,6 +28,7 @@ urlpatterns = [
     path('get_event_via_id/', get_event_via_id),
     path('remove_interest_participation/', remove_interest_participation),
     path('display_comments/', display_comments),
+    path('delete_event/', delete_event),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
