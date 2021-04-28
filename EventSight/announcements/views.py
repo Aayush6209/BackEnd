@@ -37,6 +37,13 @@ def register_view(request):
                     student_id=student_id, password=make_password(password), email=email, first_name=first_name, last_name=last_name, branch=branch)
                 student.save()
 
+                # if there is Goc then add student to follow list.
+                try:
+                    Goc = Club.objects.get(name="General Organising Committee")
+                    Goc.followers.add(student)
+                except:
+                    pass
+
                 credentials = student_serializer(student)
                 new_token = Token.objects.create(
                     student_id=student_id, token=get_random_string(length=32))
