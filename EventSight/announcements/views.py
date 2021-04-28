@@ -9,6 +9,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
 from django.utils.crypto import get_random_string
 from datetime import datetime
+import os
 
 
 # Create your views here.
@@ -597,6 +598,7 @@ def delete_event(request):
         club = Club.objects.get(admin_id=student_id)
         event = Event.objects.get(pk=event_id)
         if event.organizer == club:
+            os.remove(event.photo.path)
             event.delete()
             return Response({"message": "Event deleted successfully"}, status=status.HTTP_200_OK)
         else:
