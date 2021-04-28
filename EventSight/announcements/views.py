@@ -594,7 +594,7 @@ def delete_event(request):
         serializer = universal_serializer(data=request.data)
         student_id = serializer.data['student_id']
         event_id = serializer.data['event_id']
-        club = Club.objects.get(admin__id=student_id)
+        club = Club.objects.get(admin_id=student_id)
         event = Event.objects.get(pk=event_id)
         if event.organizer == club:
             event.delete()
