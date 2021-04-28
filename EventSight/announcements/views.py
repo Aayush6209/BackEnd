@@ -584,3 +584,22 @@ def display_comments(request):
         comments = Comment.objects.filter(event__id=event_id).order_by('date_time')
         return Response(comment_serializer_with_student(comments, many=True).data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_502_BAD_GATEWAY)
+
+
+@api_view(['POST'])
+def delete_event(request):
+    try:
+        if (token_check(request) == False):
+            return Response({"message": "You are unouthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = universal_serializer(data=request.data)
+        student_id = serializer.data['student_id']
+        event_id = serializer.data['event_id']
+        club = Club.objects.get(admin__id=student_id)
+        event = Event.objects.get(pk=event_id)
+        if event.organizer == club:
+            event.delete()
+            return Response({"message": "Event deleted successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "You are unouthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    except:
+        return Response({"message": "Something went wrong!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
