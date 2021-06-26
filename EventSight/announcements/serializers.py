@@ -1,108 +1,42 @@
-from django.db.models import fields
-from rest_framework import serializers
-from .models import Student, Club, Token, member_request, Event, Comment
-from django import forms
-
-# these are serializers
+from django.core import files
+from rest_framework.serializers import ModelSerializer
+from .models import Comment, Event, User, Club, member_request
 
 
-class student_serializer(serializers.ModelSerializer):
+class UserSerializer(ModelSerializer):
     class Meta:
-        model = Student
-        fields = '__all__'
+        model = User
+        fields = ['username', 'password', 'email', 'first_name', 'last_name']
 
 
-class club_serializer(serializers.ModelSerializer):
+class UserSerializer2(ModelSerializer):
     class Meta:
-        model = Club
-        fields = '__all__'
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
 
 
-class member_request_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
-    class Meta:
-        model = member_request
-        fields = '__all__'
-
-
-class event_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
+class EventSerializer(ModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
 
 
-class comment_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
+class ClubSerializer(ModelSerializer):
+    class Meta:
+        model = Club
+        fields = '__all__'
+
+
+class MemberRequestSerializer(ModelSerializer):
+    User = UserSerializer2(read_only=True)
+    class Meta:
+        model = member_request
+        # fields = ['id', 'date_time', 'student', 'club']
+        fields = '__all__'
+
+
+class CommentSerializer(ModelSerializer):
+    User = UserSerializer2(many=True, read_only=True)
     class Meta:
         model = Comment
         fields = '__all__'
-
-
-class token_serializer(serializers.ModelSerializer):
-    # copy fields from models.py
-    class Meta:
-        model = Token
-        fields = '__all__'
-
-
-class student_login_serializer(serializers.ModelSerializer):
-    role = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Student
-        fields = '__all__'
-    
-
-
-
-
-class student_serializer_without_password(serializers.ModelSerializer):
-    # copy fields from models.py
-    class Meta:
-        model = Student
-        fields = ("student_id", "first_name", "last_name", "email", "branch")
-
-
-
-
-
-
-
-
-
-
-
-class comment_serializer_with_student(serializers.ModelSerializer):
-    # copy fields from models.py
-    # comments = comment_serializer(read_only=True, many=True)
-    student = student_serializer_without_password(read_only=True)
-    class Meta:
-        model = Comment
-        # fields = ("student_id", "first_name", "last_name", "email", "branch")
-        fields = '__all__'
-
-
-class create_event_serializer(forms.Form):
-    title = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'name'}))
-    description = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'description'}))
-    details = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'details'}))
-    date_time = forms.DateTimeField(widget=forms.TextInput(
-        attrs={'placeholder': 'date_time'}))
-    open_to_all = forms.BooleanField(widget=forms.TextInput(
-        attrs={'placeholder': 'open_to_all'}))
-    image_url = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'image_url'}))
-    student_id = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'student_id'}))
-    fields = ['title', 'description', 'details',
-              'date_time', 'open_to_all', 'image_url', 'student_id']
-
-
-class universal_serializer(forms.Form):
-    student_id = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'student_id'}))
-    fields = ['student_id']

@@ -1,36 +1,23 @@
 from django.db import models
-
-
-class Student(models.Model):
-    student_id = models.CharField(max_length=8, primary_key=True)
-    password = models.CharField(max_length=1024)
-    email = models.EmailField(max_length=1024)
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    branch = models.CharField(max_length=64)
+from django.contrib.auth.models import User
 
 
 class Club(models.Model):
 
-    # club will have an admin, and if we delete admin then it would do nothing
     name = models.CharField(max_length=128, primary_key=True)
     admin = models.ForeignKey(
-        Student, on_delete=models.DO_NOTHING, default=None, related_name="club_admin")
+        User, on_delete=models.PROTECT, default=None, related_name="club_admin")
     description = models.CharField(max_length=2048)
     followers = models.ManyToManyField(
-        Student, blank=True, related_name="follow_list")
+        User, blank=True, related_name="follows")
     members = models.ManyToManyField(
-        Student, blank=True, related_name="member_list")
-    image_url = models.URLField()
+        User, blank=True, related_name="club")
     club_picture = models.ImageField(upload_to='club_uploads/', blank=True)
-
-    def __str__(self):
-        return f"{self.name}, administered by: {self.admin}"
 
 
 class member_request(models.Model):
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, default=None)
+    User = models.ForeignKey(
+        User, on_delete=models.CASCADE, default=None)
     club = models.ForeignKey(Club, on_delete=models.CASCADE, default=None)
     date_time = models.DateTimeField(auto_now_add=True)
 
@@ -43,13 +30,12 @@ class Event(models.Model):
     details = models.CharField(max_length=2048)
     date_time = models.DateTimeField()
     organizer = models.ForeignKey(
-        Club, on_delete=models.CASCADE, related_name="event_organizers")
+        Club, on_delete=models.CASCADE)
     interested = models.ManyToManyField(
-        Student, blank=True, related_name="interested_events")
+        User, blank=True, related_name="interests")
     participants = models.ManyToManyField(
-        Student, blank=True, related_name="participated_events")
+        User, blank=True, related_name="event")
     open_to_all = models.BooleanField()
-    image_url = models.URLField()
     photo = models.ImageField(upload_to="upload/", blank=True)
 
 
@@ -57,16 +43,6 @@ class Comment(models.Model):
 
     comment_text = models.CharField(max_length=2048)
     date_time = models.DateTimeField(auto_now_add=True)
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, default=None)
+    User = models.ForeignKey(
+        User, on_delete=models.CASCADE, default=None)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, default=None)
-
-
-class Token(models.Model):
-
-    student_id = models.CharField(max_length=8, primary_key=True)
-    token = models.CharField(max_length=32)
-
-# class IMAGES(models.Model):
-#     name = models.CharField(max_length=128, primary_key=True)
-#     photo = models.ImageField(upload_to='uploads/')
