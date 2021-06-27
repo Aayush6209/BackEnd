@@ -62,7 +62,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'try2.wsgi.application'
+WSGI_APPLICATION = 'EventSight.wsgi.application'
 
 
 # Database
